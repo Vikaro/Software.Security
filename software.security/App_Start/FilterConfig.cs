@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
 
-namespace software.security
+namespace Software.Security
 {
     public class FilterConfig
     {

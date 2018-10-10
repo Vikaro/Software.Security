@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace software.security
+namespace Software.Security
 {
     public class BundleConfig
     {
