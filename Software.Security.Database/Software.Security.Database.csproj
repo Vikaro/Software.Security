@@ -49,10 +49,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Services\AuthorizationService.cs" />
-    <Compile Include="Services\IAuthorizationService.cs" />
+    <Compile Include="Models\AllowedMessage.cs" />
+    <Compile Include="Models\Message.cs" />
+    <Compile Include="Services\AuthorizationRepository.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\IAuthorizationRepository.cs" />
+    <Compile Include="Services\IMessageRepository.cs" />
+    <Compile Include="Services\MessageRepository.cs" />
     <Compile Include="SoftwareSecurityDatabase.cs" />
   </ItemGroup>
   <ItemGroup>

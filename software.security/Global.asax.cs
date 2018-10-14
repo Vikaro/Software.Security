@@ -1,7 +1,9 @@
 ﻿using SimpleInjector;
 using SimpleInjector.Integration.Web;
 using SimpleInjector.Integration.Web.Mvc;
+using Software.Security.App_Start;
 using Software.Security.Database;
+using Software.Security.Database.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +32,10 @@ namespace Software.Security
             // Register your types, for instance:
             container.Register<ISoftwareSecurityDatabase, SoftwareSecurityDatabase>();
             container.Register<IAuthorizationRepository, AuthorizationRepository>();
+            container.Register<IMessageRepository, MessageRepository>();
+
+            // Automapper
+            container.RegisterSingleton(() => GetMapper(container));
 
             // This is an extension method from the integration package.
             container.RegisterMvcControllers(Assembly.GetExecutingAssembly());
@@ -38,5 +44,13 @@ namespace Software.Security
 
             DependencyResolver.SetResolver(new SimpleInjectorDependencyResolver(container));
         }
+
+        private AutoMapper.IMapper GetMapper(Container container)
+        {
+            var mp = container.GetInstance<AutoMapperConfig>();
+            return mp.GetMapper();
+        }
     }
+  
+
 }

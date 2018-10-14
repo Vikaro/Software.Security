@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 
-namespace Software.Security.Database.Models
+namespace Software.Security.Models.Authorization
 {
-    public class User
+    public class UserViewModel
     {
         public int UserId { get; set; }
         public string Name { get; set; }
-        public string PasswordHash { get; set; }
-        public string Salt { get; set; }
         public DateTime LastLogin { get; set; }
     }
 }

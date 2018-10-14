@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using NMemory.Constraints;
+using NMemory.Indexes;
+using NMemory.Utilities;
 
 namespace Software.Security.Database
 {
@@ -17,10 +20,11 @@ namespace Software.Security.Database
     {
         public SoftwareSecurityDatabase()
         {
-            var users = base.Tables.Create<User, Guid>(p => p.UserId, null);
-            var messages = base.Tables.Create<Message, Guid>(g => g.MessageId, null);
+            var users = base.Tables.Create(p => p.UserId, new IdentitySpecification<User>(x => x.UserId,1, 1 ));
+            var messages = base.Tables.Create(g => g.MessageId, new IdentitySpecification<Message>(x => x.MessageId, 1, 1));
 
             InitializationData.InitializeUsers(users);
+            InitializationData.InitializeMessages(messages);
 
             this.Users = users;
             this.Messages = messages;
@@ -33,6 +37,7 @@ namespace Software.Security.Database
 
     static class InitializationData
     {
+        private static int  adminId = 1;
         static internal void InitializeUsers(ITable<User> users)
         {
             users.Insert(new User
@@ -40,7 +45,22 @@ namespace Software.Security.Database
                 Name = "admin",
                 PasswordHash = "admin",
                 LastLogin = DateTime.Now,
-                Salt = string.Empty
+                Salt = string.Empty,
+            });
+        }
+        static internal void InitializeMessages(ITable<Message> messages)
+        {
+            messages.Insert(new Message
+            {
+                Modified = DateTime.Now,
+                Text = "Random text",
+                UserId = adminId,
+            });
+            messages.Insert(new Message
+            {
+                Modified = DateTime.Now,
+                Text = "Random text 2",
+                UserId = adminId,
             });
         }
     }
