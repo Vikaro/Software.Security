@@ -51,12 +51,12 @@
   <ItemGroup>
     <Compile Include="Models\AllowedMessage.cs" />
     <Compile Include="Models\Message.cs" />
-    <Compile Include="Services\AuthorizationRepository.cs" />
+    <Compile Include="Repository\AuthorizationRepository.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\IAuthorizationRepository.cs" />
-    <Compile Include="Services\IMessageRepository.cs" />
-    <Compile Include="Services\MessageRepository.cs" />
+    <Compile Include="Repository\IAuthorizationRepository.cs" />
+    <Compile Include="Repository\IMessageRepository.cs" />
+    <Compile Include="Repository\MessageRepository.cs" />
     <Compile Include="SoftwareSecurityDatabase.cs" />
   </ItemGroup>
   <ItemGroup>

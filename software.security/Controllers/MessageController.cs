@@ -1,55 +1,90 @@
-﻿using Software.Security.Database.Services;
+﻿using Software.Security.Database;
+using Software.Security.Database.Repository;
+using Software.Security.Models;
 using Software.Security.Models.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Mvc.Filters;
 
 namespace Software.Security.Controllers
 {
     public class MessageController : Controller
     {
         private readonly IMessageRepository _messageRepository;
+        private readonly IAuthorizationRepository _authorizationRepository;
+
         private UserViewModel _user;
-        public MessageController(IMessageRepository messageRepository)
+        public MessageController(IMessageRepository messageRepository, IAuthorizationRepository authorizationRepository)
         {
             _messageRepository = messageRepository;
+            _authorizationRepository = authorizationRepository;
+        }
 
-        }
-        public ActionResult AddMessage(string text)
+        public ActionResult EditMessage(string text)
         {
-            if (GetCurrentUser() != null)
+            return View(new MessageViewModel()
             {
-                var model = this._messageRepository.AddMessage(text, 1);
-                return Json(model, JsonRequestBehavior.AllowGet);
-            }
-            throw new UnauthorizedAccessException();
+                Text = text
+            });
         }
-        public ActionResult RemoveMessage(int id)
+
+        //public ActionResult AddMessagePost(string text)
+        //{
+        //    var model = this._messageRepository.AddMessage(text, this._user.UserId);
+        //    //return Json(model, JsonRequestBehavior.AllowGet);
+        //    return RedirectToAction("Index", "Home");
+
+        //}
+        public ActionResult RemoveMessagePost(int id)
         {
-            if (GetCurrentUser() != null)
+            if (this._authorizationRepository.IsUserOwnerMessage(this._user.UserId, id))
             {
                 var model = this._messageRepository.RemoveMessage(id);
-                return Json(model, JsonRequestBehavior.AllowGet);
+                //return Json(model, JsonRequestBehavior.AllowGet);
+                return RedirectToAction("Index", "Home");
+
             }
             throw new UnauthorizedAccessException();
-
         }
-        public ActionResult EditMessage(int id, string text)
+        public ActionResult EditMessagePost(int? id, string text)
         {
-            if (GetCurrentUser() != null)
+            var messageId = id ?? default(int);
+            if (messageId.Equals(default(int)))
             {
-                var model = this.EditMessage(id, text);
-                return Json(model, JsonRequestBehavior.AllowGet);
+                var model = this._messageRepository.AddMessage(text, this._user.UserId);
+                return RedirectToAction("Index", "Home");
+            }
+            if (this._authorizationRepository.IsUserOwnerMessage(this._user.UserId, messageId) || this._authorizationRepository.IsUserAllowedToEdit(this._user.UserId, messageId))
+            {
+                var model = this._messageRepository.EditMessage(messageId, text);
+                //return Json(model, JsonRequestBehavior.AllowGet);
+                return RedirectToAction("Index","Home");
             }
             throw new UnauthorizedAccessException();
-
         }
 
         private UserViewModel GetCurrentUser()
         {
             return _user = Session["CurrentUser"] as UserViewModel;
+        }
+
+        protected override void OnAuthorization(AuthorizationContext filterContext)
+        {
+            //base.OnAuthorization(filterContext);
+            _user = Session["CurrentUser"] as UserViewModel;
+            if (_user == null) throw new UnauthorizedAccessException();
+        }
+        protected override void OnAuthentication(AuthenticationContext filterContext)
+        {
+
+            //base.OnAuthentication(filterContext);
+        }
+        protected override void OnException(ExceptionContext filterContext)
+        {
+            base.OnException(filterContext);
         }
 
     }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Software.Security.Database.Services
+namespace Software.Security.Database.Repository
 {
     public class MessageRepository : IMessageRepository
     {
@@ -19,6 +19,10 @@ namespace Software.Security.Database.Services
         public IEnumerable<Message> GetMessages()
         {
             return this._database.Messages.Take(_messageLimit).ToList();
+        }
+        public Message GetMessage(int id)
+        {
+            return this._database.Messages.Where(i => i.MessageId.Equals(id)).FirstOrDefault();
         }
         public Message AddMessage(string text, int userId)
         {

@@ -8,11 +8,15 @@
     @foreach (var message in Model)
     {
         <div class="col-sm-6">
-            <div class="card">
+            <div class="card" id="@message.MessageId">
                 <div class="card-body">
                     @*<h5 class="card-title">Special title</h5>*@
                     <p class="card-text"> @message.Text </p>
                     <a href="#" class="btn btn-primary">Go somewhere</a>
+                    <button onclick="editModal(@message.MessageId)">Edit</button>
+                    @Html.ActionLink("Remove message", "RemoveMessage", "Message", new { id = message.MessageId });
+
+                    @*@Html.ActionLink("Edit message", "EditMessage", "Message");*@
                 </div>
                 <div class="card-footer text-muted">
                     @message.Modified

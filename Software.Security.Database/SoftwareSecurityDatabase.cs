@@ -14,6 +14,7 @@ namespace Software.Security.Database
         ITable<User> Users { get; }
 
         ITable<Message> Messages { get;  }
+        ITable<AllowedMessage> AllowedMessages { get; }
     };
 
     public class SoftwareSecurityDatabase : NMemory.Database, ISoftwareSecurityDatabase
@@ -22,17 +23,20 @@ namespace Software.Security.Database
         {
             var users = base.Tables.Create(p => p.UserId, new IdentitySpecification<User>(x => x.UserId,1, 1 ));
             var messages = base.Tables.Create(g => g.MessageId, new IdentitySpecification<Message>(x => x.MessageId, 1, 1));
+            var allowedMessages = base.Tables.Create(g => g.MessageId, new IdentitySpecification<AllowedMessage>(x => x.MessageId, 1, 1));
 
             InitializationData.InitializeUsers(users);
             InitializationData.InitializeMessages(messages);
 
             this.Users = users;
             this.Messages = messages;
+            this.AllowedMessages = allowedMessages;
         }
 
         public ITable<User> Users { get; private set; }
 
         public ITable<Message> Messages { get; private set; }
+        public ITable<AllowedMessage> AllowedMessages { get; private set; }
     }
 
     static class InitializationData
@@ -46,6 +50,15 @@ namespace Software.Security.Database
                 PasswordHash = "admin",
                 LastLogin = DateTime.Now,
                 Salt = string.Empty,
+                UserId = adminId
+            });
+            users.Insert(new User
+            {
+                Name = "subadmin",
+                PasswordHash = "admin",
+                LastLogin = DateTime.Now,
+                Salt = string.Empty,
+                UserId = 2
             });
         }
         static internal void InitializeMessages(ITable<Message> messages)
@@ -58,10 +71,19 @@ namespace Software.Security.Database
             });
             messages.Insert(new Message
             {
-                Modified = DateTime.Now,
+                Modified = DateTime.Now.AddHours(-2),
                 Text = "Random text 2",
                 UserId = adminId,
             });
         }
+        static internal void InitializeAllowedMessages(ITable<AllowedMessage> allowedMessages)
+        {
+            allowedMessages.Insert(new AllowedMessage()
+            {
+                UserId = 2,
+                MessageId = 1
+            });
+        }
+
     }
 }

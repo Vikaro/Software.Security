@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Software.Security.Database.Models;
 
-namespace Software.Security.Database.Services
+namespace Software.Security.Database.Repository
 {
     public interface IMessageRepository
     {
@@ -9,5 +9,6 @@ namespace Software.Security.Database.Services
         Message EditMessage(int id, string text);
         IEnumerable<Message> GetMessages();
         bool RemoveMessage(int id);
+        Message GetMessage(int id);
     }
 }

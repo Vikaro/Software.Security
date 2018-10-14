@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Software.Security.Database;
-using Software.Security.Database.Services;
+using Software.Security.Database.Repository;
 using Software.Security.Models.Authorization;
 using System;
 using System.Collections.Generic;
@@ -50,7 +50,7 @@ namespace Software.Security.Controllers
 
         public ActionResult UserLogin(string login, string password)
         {
-            if (this._authorizationRepository.IsUser(login, password))
+            if (this._authorizationRepository.IsUserExist(login, password))
             {
                 var user = this._authorizationRepository.GetUser(login);
                 var model = this._mapper.Map<UserViewModel>(user);
