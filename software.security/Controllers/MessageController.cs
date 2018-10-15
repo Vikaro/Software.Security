@@ -2,6 +2,7 @@
 using Software.Security.Database.Repository;
 using Software.Security.Models;
 using Software.Security.Models.Authorization;
+using Software.Security.Models.Message;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,7 @@ namespace Software.Security.Controllers
         //    return RedirectToAction("Index", "Home");
 
         //}
+
         public ActionResult RemoveMessagePost(int id)
         {
             if (this._authorizationRepository.IsUserOwnerMessage(this._user.UserId, id))
@@ -64,6 +66,14 @@ namespace Software.Security.Controllers
                 return RedirectToAction("Index","Home");
             }
             throw new UnauthorizedAccessException();
+        }
+
+        public ActionResult AddAllowedUser(int messageId)
+        {
+            var model = new AllowedMessageViewModel();
+            model.Message = this._messageRepository.GetMessage(messageId);
+            //model.Users = this.
+            return View();
         }
 
         private UserViewModel GetCurrentUser()

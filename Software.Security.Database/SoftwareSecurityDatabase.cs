@@ -27,7 +27,8 @@ namespace Software.Security.Database
 
             InitializationData.InitializeUsers(users);
             InitializationData.InitializeMessages(messages);
-
+            InitializationData.InitializeAllowedMessages(allowedMessages);
+            
             this.Users = users;
             this.Messages = messages;
             this.AllowedMessages = allowedMessages;
