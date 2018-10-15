@@ -25,17 +25,6 @@ namespace Software.Security.Controllers
             _mapper = mapper;
         }
 
-        // GET: AllowedMessage
-        public ActionResult Index()
-        {
-            return View();
-        }
-
-        // GET: AllowedMessage/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
 
         // GET: AllowedMessage/Create
         public ActionResult Create(int id)
@@ -51,23 +40,13 @@ namespace Software.Security.Controllers
         [HttpGet]
         public ActionResult CreatePost(int selectedUser, int messageId)
         {
-            try
+            if (this._authorizationRepository.IsUserOwnerMessage(_user.UserId, messageId))
             {
-                if (this._authorizationRepository.IsUserOwnerMessage(_user.UserId, messageId))
-                {
-                    this._authorizationRepository.AddUserToAllowedMessage(selectedUser, messageId);
-                    return RedirectToAction("Index", nameof(HomeController));
-                }
-                ViewBag.Error = "You are not authorized to edit this message";
-                return RedirectToAction("Create", messageId);
+                this._authorizationRepository.AddUserToAllowedMessage(selectedUser, messageId);
+                return RedirectToAction("Index", "Home");
             }
-            catch
-            {
-                ViewBag.Error = "You are not authorized to edit this message";
-                return RedirectToAction("Create", messageId);
-            }
+            throw new UnauthorizedAccessException();
         }
-
         // GET: AllowedMessage/Delete/5
         public ActionResult Delete(int id)
         {
@@ -84,10 +63,21 @@ namespace Software.Security.Controllers
         {
             if (this._authorizationRepository.IsUserOwnerMessage(_user.UserId, messageId))
             {
-                this._authorizationRepository.AddUserToAllowedMessage(selectedUser, messageId);
-                return RedirectToAction("Index", nameof(HomeController));
+                this._authorizationRepository.RemoveUserFromAllowedMessage(selectedUser, messageId);
+                return RedirectToAction("Index", "Home");
             }
             throw new UnauthorizedAccessException();
+        }
+        private UserViewModel GetCurrentUser()
+        {
+            return _user = Session["CurrentUser"] as UserViewModel;
+        }
+
+        protected override void OnAuthorization(AuthorizationContext filterContext)
+        {
+            //base.OnAuthorization(filterContext);
+            _user = Session["CurrentUser"] as UserViewModel;
+            if (_user == null) throw new UnauthorizedAccessException();
         }
     }
 }

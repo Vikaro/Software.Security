@@ -18,7 +18,8 @@
         <h4>Add users allowed to edit message</h4>
         @Html.DropDownListFor(i => i.SelectedUser, new SelectList(Model.Users, "Value", "Text"))
         <hr />
-        @Html.HiddenFor(i=> i.Message.MessageId, "messageId")
+        @Html.HiddenFor(i => i.Message.MessageId, new { @Name = "messageId" })
+
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
