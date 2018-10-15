@@ -265,6 +265,7 @@
     <Content Include="Views\Message\EditMessage.cshtml" />
     <Content Include="Views\AllowedMessage\Create.cshtml" />
     <Content Include="Views\AllowedMessage\Delete.cshtml" />
+    <Content Include="Views\Message\AddMessage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
