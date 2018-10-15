@@ -23,7 +23,7 @@ namespace Software.Security.App_Start
             mce.ConstructServicesUsing(_container.GetInstance);
             
             /// Mapping models
-            mce.CreateMap<Database.Models.User, Software.Security.Models.Authorization.UserViewModel>();
+            mce.CreateMap<Database.Models.User, Software.Security.Models.Authorization.UserViewModel>( );
 
 
             var mc = new MapperConfiguration(mce);
