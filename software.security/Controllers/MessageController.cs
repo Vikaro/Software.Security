@@ -23,6 +23,15 @@ namespace Software.Security.Controllers
             _authorizationRepository = authorizationRepository;
         }
 
+        public ActionResult AddMessage(string text)
+        {
+            return View(new MessageViewModel()
+            {
+                Text = text
+            });
+        }
+
+
         public ActionResult EditMessage(string text)
         {
             return View(new MessageViewModel()
@@ -31,13 +40,21 @@ namespace Software.Security.Controllers
             });
         }
 
-        //public ActionResult AddMessagePost(string text)
-        //{
-        //    var model = this._messageRepository.AddMessage(text, this._user.UserId);
-        //    //return Json(model, JsonRequestBehavior.AllowGet);
-        //    return RedirectToAction("Index", "Home");
+        public ActionResult RemoveMessage(string text)
+        {
+            return View(new MessageViewModel()
+            {
+                Text = text
+            });
+        }
 
-        //}
+        public ActionResult AddMessagePost(string text)
+        {
+            var model = this._messageRepository.AddMessage(text, this._user.UserId);
+            //return Json(model, JsonRequestBehavior.AllowGet);
+            return RedirectToAction("Index", "Home");
+
+        }
         public ActionResult RemoveMessagePost(int id)
         {
             if (this._authorizationRepository.IsUserOwnerMessage(this._user.UserId, id))
@@ -75,7 +92,7 @@ namespace Software.Security.Controllers
         {
             //base.OnAuthorization(filterContext);
             _user = Session["CurrentUser"] as UserViewModel;
-            if (_user == null) throw new UnauthorizedAccessException();
+            //if (_user == null) throw new UnauthorizedAccessException();
         }
         protected override void OnAuthentication(AuthenticationContext filterContext)
         {

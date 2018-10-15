@@ -14,9 +14,9 @@
                     <p class="card-text"> @message.Text </p>
                     <a href="#" class="btn btn-primary">Go somewhere</a>
                     <button onclick="editModal(@message.MessageId)">Edit</button>
-                    @Html.ActionLink("Remove message", "RemoveMessage", "Message", new { id = message.MessageId });
+                    @Html.ActionLink("Remove message", "RemoveMessagePost", "Message", new { id = message.MessageId });
 
-                    @*@Html.ActionLink("Edit message", "EditMessage", "Message");*@
+                    @Html.ActionLink("Edit message", "EditMessage", "Message");
                 </div>
                 <div class="card-footer text-muted">
                     @message.Modified
