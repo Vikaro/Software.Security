@@ -1,12 +1,8 @@
-﻿using Software.Security.Database;
-using Software.Security.Database.Repository;
+﻿using Software.Security.Database.Repository;
 using Software.Security.Models;
 using Software.Security.Models.Authorization;
 using Software.Security.Models.Message;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Mvc.Filters;
 
@@ -33,19 +29,20 @@ namespace Software.Security.Controllers
         }
 
 
-        public ActionResult EditMessage(string text)
+        public ActionResult EditMessage(string text, int id)
         {
             return View(new MessageViewModel()
             {
-                Text = text
+                Text = text,
+                MessageId = id
             });
         }
 
-        public ActionResult RemoveMessage(string text)
+        public ActionResult RemoveMessage(int id)
         {
             return View(new MessageViewModel()
             {
-                Text = text
+                MessageId = id
             });
         }
 
@@ -68,14 +65,9 @@ namespace Software.Security.Controllers
             }
             throw new UnauthorizedAccessException();
         }
-        public ActionResult EditMessagePost(int? id, string text)
+        public ActionResult EditMessagePost(int? messageID, string text)
         {
-            var messageId = id ?? default(int);
-            if (messageId.Equals(default(int)))
-            {
-                var model = this._messageRepository.AddMessage(text, this._user.UserId);
-                return RedirectToAction("Index", "Home");
-            }
+            var messageId = messageID ?? default(int);
             if (this._authorizationRepository.IsUserOwnerMessage(this._user.UserId, messageId) || this._authorizationRepository.IsUserAllowedToEdit(this._user.UserId, messageId))
             {
                 var model = this._messageRepository.EditMessage(messageId, text);

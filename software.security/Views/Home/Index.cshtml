@@ -16,9 +16,9 @@
                     <button onclick="editModal(@message.MessageId)">Edit</button>
                     @Html.ActionLink("Add access", "Create", "AllowedMessage", new { id = message.MessageId }, new { @class="btn btn-primary"})
                     @Html.ActionLink("Remove access", "Delete", "AllowedMessage", new { id = message.MessageId }, new { @class = "btn btn-primary" })
-                    @Html.ActionLink("Remove message", "RemoveMessagePost", "Message", new { id = message.MessageId });
+                    @Html.ActionLink("Remove message", "RemoveMessagePost", "Message", new { id = message.MessageId }, null);
 
-                    @Html.ActionLink("Edit message", "EditMessage", "Message");
+                    @Html.ActionLink("Edit message", "EditMessage", "Message", new { id = message.MessageId }, null);
                 </div>
                 <div class="card-footer text-muted">
                     @message.Modified
@@ -26,4 +26,8 @@
             </div>
         </div>
     }
+
+    <div>
+        @Html.ActionLink("Add message", "AddMessage", "Message")
+    </div>
 </div>
