@@ -14,9 +14,9 @@
                     <p class="card-text"> @message.Text </p>
                     @Html.ActionLink("Add access", "Create", "AllowedMessage", new { id = message.MessageId }, new { @class="btn btn-primary"})
                     @Html.ActionLink("Remove access", "Delete", "AllowedMessage", new { id = message.MessageId }, new { @class = "btn btn-primary" })
-                    @Html.ActionLink("Remove message", "RemoveMessagePost", "Message", new { id = message.MessageId }, new { @class = "btn btn-primary" });
+                    @Html.ActionLink("Remove message", "RemoveMessagePost", "Message", new { id = message.MessageId }, new { @class = "btn btn-primary" })
 
-                    @Html.ActionLink("Edit message", "EditMessage", "Message", new { id = message.MessageId }, new { @class = "btn btn-primary" });
+                    @Html.ActionLink("Edit message", "EditMessage", "Message", new { id = message.MessageId }, new { @class = "btn btn-primary" })
                 </div>
                 <div class="card-footer text-muted">
                     @message.Modified

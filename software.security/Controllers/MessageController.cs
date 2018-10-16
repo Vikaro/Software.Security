@@ -31,19 +31,27 @@ namespace Software.Security.Controllers
 
         public ActionResult EditMessage(string text, int id)
         {
-            return View(new MessageViewModel()
+            if (this._authorizationRepository.IsUserOwnerMessage(_user.UserId, id) || this._authorizationRepository.IsUserAllowedToEdit(this._user.UserId, id))
             {
-                Text = text,
-                MessageId = id
-            });
+                return View(new MessageViewModel()
+                {
+                    Text = text,
+                    MessageId = id
+                });
+            }
+            throw new UnauthorizedAccessException();
         }
 
         public ActionResult RemoveMessage(int id)
         {
-            return View(new MessageViewModel()
+            if (this._authorizationRepository.IsUserOwnerMessage(_user.UserId, id))
             {
-                MessageId = id
-            });
+                return View(new MessageViewModel()
+                {
+                    MessageId = id
+                });
+            }
+            throw new UnauthorizedAccessException();
         }
 
         public ActionResult AddMessagePost(string text)
@@ -75,14 +83,6 @@ namespace Software.Security.Controllers
                 return RedirectToAction("Index","Home");
             }
             throw new UnauthorizedAccessException();
-        }
-
-        public ActionResult AddAllowedUser(int messageId)
-        {
-            var model = new AllowedMessageViewModel();
-            model.Message = this._messageRepository.GetMessage(messageId);
-            //model.Users = this.
-            return View();
         }
 
         private UserViewModel GetCurrentUser()

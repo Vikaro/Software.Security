@@ -29,11 +29,15 @@ namespace Software.Security.Controllers
         // GET: AllowedMessage/Create
         public ActionResult Create(int id)
         {
-            var model = new AllowedMessageViewModel();
-            model.Message = this._messageRepository.GetMessage(id);
-            var users = this._mapper.Map<IEnumerable<UserViewModel>>(this._authorizationRepository.GetUsers());
-            model.Users = users.Select(i => new SelectListItem() { Value = i.UserId.ToString(), Text = i.Name });
-            return View(model);
+            if (this._authorizationRepository.IsUserOwnerMessage(_user.UserId, id))
+            {
+                var model = new AllowedMessageViewModel();
+                model.Message = this._messageRepository.GetMessage(id);
+                var users = this._mapper.Map<IEnumerable<UserViewModel>>(this._authorizationRepository.GetUsers());
+                model.Users = users.Select(i => new SelectListItem() { Value = i.UserId.ToString(), Text = i.Name });
+                return View(model);
+            }
+            throw new UnauthorizedAccessException();
         }
 
         // POST: AllowedMessage/Create
@@ -50,11 +54,16 @@ namespace Software.Security.Controllers
         // GET: AllowedMessage/Delete/5
         public ActionResult Delete(int id)
         {
-            var model = new AllowedMessageViewModel();
-            model.Message = this._messageRepository.GetMessage(id);
-            var users = this._mapper.Map<IEnumerable<UserViewModel>>(this._authorizationRepository.GetUsersFromAllowedMessage(id));
-            model.Users = users.Select(i => new SelectListItem() { Value = i.UserId.ToString(), Text = i.Name });
-            return View(model);
+            if (this._authorizationRepository.IsUserOwnerMessage(_user.UserId, id))
+            {
+                var model = new AllowedMessageViewModel();
+                model.Message = this._messageRepository.GetMessage(id);
+                var users = this._mapper.Map<IEnumerable<UserViewModel>>(this._authorizationRepository.GetUsersFromAllowedMessage(id));
+                model.Users = users.Select(i => new SelectListItem() { Value = i.UserId.ToString(), Text = i.Name });
+                return View(model);
+            }
+            throw new UnauthorizedAccessException();
+
         }
 
         // POST: AllowedMessage/Delete/5
