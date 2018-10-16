@@ -55,11 +55,20 @@ namespace Software.Security.Database
             });
             users.Insert(new User
             {
-                Name = "subadmin",
-                PasswordHash = "admin",
+                Name = "admin2",
+                PasswordHash = "admin2",
                 LastLogin = DateTime.Now,
                 Salt = string.Empty,
                 UserId = 2
+            });
+
+            users.Insert(new User
+            {
+                Name = "admin3",
+                PasswordHash = "admin3",
+                LastLogin = DateTime.Now,
+                Salt = string.Empty,
+                UserId = 3
             });
         }
         static internal void InitializeMessages(ITable<Message> messages)

@@ -94,7 +94,7 @@ namespace Software.Security.Controllers
         {
             //base.OnAuthorization(filterContext);
             _user = Session["CurrentUser"] as UserViewModel;
-            //if (_user == null) throw new UnauthorizedAccessException();
+            if (_user == null) throw new UnauthorizedAccessException();
         }
         protected override void OnAuthentication(AuthenticationContext filterContext)
         {

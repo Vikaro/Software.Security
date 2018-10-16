@@ -12,13 +12,11 @@
                 <div class="card-body">
                     @*<h5 class="card-title">Special title</h5>*@
                     <p class="card-text"> @message.Text </p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                    <button onclick="editModal(@message.MessageId)">Edit</button>
                     @Html.ActionLink("Add access", "Create", "AllowedMessage", new { id = message.MessageId }, new { @class="btn btn-primary"})
                     @Html.ActionLink("Remove access", "Delete", "AllowedMessage", new { id = message.MessageId }, new { @class = "btn btn-primary" })
-                    @Html.ActionLink("Remove message", "RemoveMessagePost", "Message", new { id = message.MessageId }, null);
+                    @Html.ActionLink("Remove message", "RemoveMessagePost", "Message", new { id = message.MessageId }, new { @class = "btn btn-primary" });
 
-                    @Html.ActionLink("Edit message", "EditMessage", "Message", new { id = message.MessageId }, null);
+                    @Html.ActionLink("Edit message", "EditMessage", "Message", new { id = message.MessageId }, new { @class = "btn btn-primary" });
                 </div>
                 <div class="card-footer text-muted">
                     @message.Modified
@@ -28,6 +26,6 @@
     }
 
     <div>
-        @Html.ActionLink("Add message", "AddMessage", "Message")
+        @Html.ActionLink("Add message", "AddMessage", "Message",null, new { @class = "btn btn-primary" })
     </div>
 </div>
