@@ -3,8 +3,10 @@ using Software.Security.Models;
 using Software.Security.Models.Authorization;
 using Software.Security.Models.Message;
 using System;
+using System.Net;
 using System.Web.Mvc;
 using System.Web.Mvc.Filters;
+using System.Web.Routing;
 
 namespace Software.Security.Controllers
 {
@@ -39,7 +41,7 @@ namespace Software.Security.Controllers
                     MessageId = id
                 });
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
         }
 
         public ActionResult RemoveMessage(int id)
@@ -51,7 +53,7 @@ namespace Software.Security.Controllers
                     MessageId = id
                 });
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
         }
 
         public ActionResult AddMessagePost(string text)
@@ -71,7 +73,7 @@ namespace Software.Security.Controllers
                 return RedirectToAction("Index", "Home");
 
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
         }
         public ActionResult EditMessagePost(int? messageID, string text)
         {
@@ -82,7 +84,7 @@ namespace Software.Security.Controllers
                 //return Json(model, JsonRequestBehavior.AllowGet);
                 return RedirectToAction("Index","Home");
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
         }
 
         private UserViewModel GetCurrentUser()
@@ -94,7 +96,10 @@ namespace Software.Security.Controllers
         {
             //base.OnAuthorization(filterContext);
             _user = Session["CurrentUser"] as UserViewModel;
-            if (_user == null) throw new UnauthorizedAccessException();
+            if (_user == null)
+            {
+                filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "Error", action = "Unauthorized" }));
+            }
         }
         protected override void OnAuthentication(AuthenticationContext filterContext)
         {

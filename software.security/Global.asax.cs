@@ -17,6 +17,13 @@ namespace Software.Security
 {
     public class MvcApplication : System.Web.HttpApplication
     {
+        protected void Application_Error(object sender, EventArgs e)
+        {
+            Exception exception = Server.GetLastError();
+            if (exception != null)
+            {
+            }
+        }
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();

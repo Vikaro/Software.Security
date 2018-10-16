@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Routing;
 
 namespace Software.Security.Controllers
 {
@@ -37,7 +38,7 @@ namespace Software.Security.Controllers
                 model.Users = users.Select(i => new SelectListItem() { Value = i.UserId.ToString(), Text = i.Name });
                 return View(model);
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
         }
 
         // POST: AllowedMessage/Create
@@ -49,7 +50,7 @@ namespace Software.Security.Controllers
                 this._authorizationRepository.AddUserToAllowedMessage(selectedUser, messageId);
                 return RedirectToAction("Index", "Home");
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
         }
         // GET: AllowedMessage/Delete/5
         public ActionResult Delete(int id)
@@ -62,7 +63,7 @@ namespace Software.Security.Controllers
                 model.Users = users.Select(i => new SelectListItem() { Value = i.UserId.ToString(), Text = i.Name });
                 return View(model);
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
 
         }
 
@@ -75,7 +76,7 @@ namespace Software.Security.Controllers
                 this._authorizationRepository.RemoveUserFromAllowedMessage(selectedUser, messageId);
                 return RedirectToAction("Index", "Home");
             }
-            throw new UnauthorizedAccessException();
+            return RedirectToAction("Unauthorized", "Error");
         }
         private UserViewModel GetCurrentUser()
         {
@@ -86,7 +87,10 @@ namespace Software.Security.Controllers
         {
             //base.OnAuthorization(filterContext);
             _user = Session["CurrentUser"] as UserViewModel;
-            if (_user == null) throw new UnauthorizedAccessException();
+            if (_user == null)
+            {
+                filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "Error", action = "Unauthorized" }));
+            }
         }
     }
 }
