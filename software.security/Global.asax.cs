@@ -37,7 +37,7 @@ namespace Software.Security
             container.Options.DefaultScopedLifestyle = new WebRequestLifestyle();
 
             // Register your types, for instance:
-            container.Register<ISoftwareSecurityDatabase, SoftwareSecurityDatabase>(lifestyle: Lifestyle.Singleton );
+            container.Register<SoftwareSecurityDatabase>(lifestyle: Lifestyle.Singleton );
             container.Register<IAuthorizationRepository, AuthorizationRepository>();
             container.Register<IMessageRepository, MessageRepository>();
 

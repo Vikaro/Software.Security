@@ -7,93 +7,116 @@ using System.Threading.Tasks;
 using NMemory.Constraints;
 using NMemory.Indexes;
 using NMemory.Utilities;
+using System.Data.Entity;
+using System.Linq;
 
 namespace Software.Security.Database
 {
-    public interface ISoftwareSecurityDatabase {
-        ITable<User> Users { get; }
+  
 
-        ITable<Message> Messages { get;  }
-        ITable<AllowedMessage> AllowedMessages { get; }
-    };
-
-    public class SoftwareSecurityDatabase : NMemory.Database, ISoftwareSecurityDatabase
+    public class SoftwareSecurityDatabase : DbContext
     {
-        public SoftwareSecurityDatabase()
+      public DbSet<User> Users { get; set; }
+      public DbSet<Message> Messages { get; set; }
+      //public DbSet<AllowedMessage> AllowedMessages { get; set; }
+        public DbContext context;
+        public SoftwareSecurityDatabase(): base()
         {
-            var users = base.Tables.Create(p => p.UserId, new IdentitySpecification<User>(x => x.UserId,1, 1 ));
-            var messages = base.Tables.Create(g => g.MessageId, new IdentitySpecification<Message>(x => x.MessageId, 1, 1));
-            var allowedMessages = base.Tables.Create(g => g.MessageId, new IdentitySpecification<AllowedMessage>(x => x.MessageId, 1, 1));
+            System.Data.Entity.Database.SetInitializer<SoftwareSecurityDatabase>(new SoftwareSecurityInitializer());
 
-            InitializationData.InitializeUsers(users);
-            InitializationData.InitializeMessages(messages);
-            InitializationData.InitializeAllowedMessages(allowedMessages);
-            
-            this.Users = users;
-            this.Messages = messages;
-            this.AllowedMessages = allowedMessages;
         }
 
-        public ITable<User> Users { get; private set; }
-
-        public ITable<Message> Messages { get; private set; }
-        public ITable<AllowedMessage> AllowedMessages { get; private set; }
     }
-
-    static class InitializationData
+    public class SoftwareSecurityInitializer : DropCreateDatabaseAlways<SoftwareSecurityDatabase>
     {
-        private static int  adminId = 1;
-        static internal void InitializeUsers(ITable<User> users)
+        protected override void Seed(SoftwareSecurityDatabase context)
         {
-            users.Insert(new User
+            List<Message> defaultStandards = new List<Message>();
+            List<User> users = new List<User>();
+            users.Add(new User()
             {
                 Name = "admin",
                 PasswordHash = "admin",
                 LastLogin = DateTime.Now,
                 Salt = string.Empty,
-                UserId = adminId
             });
-            users.Insert(new User
+            users.Add(new User()
             {
                 Name = "admin2",
                 PasswordHash = "admin2",
                 LastLogin = DateTime.Now,
                 Salt = string.Empty,
-                UserId = 2
             });
-
-            users.Insert(new User
+            users.Add(new User()
             {
                 Name = "admin3",
                 PasswordHash = "admin3",
                 LastLogin = DateTime.Now,
                 Salt = string.Empty,
-                UserId = 3
             });
+            defaultStandards.Add(new Message() { Text = "Standard 1", Owner = users.First(),Modified = DateTime.Now });
+            defaultStandards.Add(new Message() { Text = "Standard 2", Owner = users.First(),Modified = DateTime.Now });
+            defaultStandards.Add(new Message() { Text = "Standard 3", Owner = users.First(),Modified = DateTime.Now });
+            context.Users.AddRange(users);
+            context.Messages.AddRange(defaultStandards);
+
+            base.Seed(context);
         }
-        static internal void InitializeMessages(ITable<Message> messages)
-        {
-            messages.Insert(new Message
-            {
-                Modified = DateTime.Now,
-                Text = "Random text",
-                UserId = adminId,
-            });
-            messages.Insert(new Message
-            {
-                Modified = DateTime.Now.AddHours(-2),
-                Text = "Random text 2",
-                UserId = adminId,
-            });
-        }
-        static internal void InitializeAllowedMessages(ITable<AllowedMessage> allowedMessages)
-        {
-            allowedMessages.Insert(new AllowedMessage()
-            {
-                UserId = 2,
-                MessageId = 1
-            });
-        }
+    }
+    static class InitializationData
+    {
+        private static int  adminId = 1;
+        //static internal void InitializeUsers(ITable<User> users)
+        //{
+        //    users.Insert(new User
+        //    {
+        //        Name = "admin",
+        //        PasswordHash = "admin",
+        //        LastLogin = DateTime.Now,
+        //        Salt = string.Empty,
+        //        UserId = adminId
+        //    });
+        //    users.Insert(new User
+        //    {
+        //        Name = "admin2",
+        //        PasswordHash = "admin2",
+        //        LastLogin = DateTime.Now,
+        //        Salt = string.Empty,
+        //        UserId = 2
+        //    });
+
+        //    users.Insert(new User
+        //    {
+        //        Name = "admin3",
+        //        PasswordHash = "admin3",
+        //        LastLogin = DateTime.Now,
+        //        Salt = string.Empty,
+        //        UserId = 3
+        //    });
+        //}
+        //static internal void InitializeMessages(ITable<Message> messages)
+        //{
+        //    messages.Insert(new Message
+        //    {
+        //        Modified = DateTime.Now,
+        //        Text = "Random text",
+        //        Owner = adminId,
+        //    });
+        //    messages.Insert(new Message
+        //    {
+        //        Modified = DateTime.Now.AddHours(-2),
+        //        Text = "Random text 2",
+        //        Owner = adminId,
+        //    });
+        //}
+        //static internal void InitializeAllowedMessages(ITable<AllowedMessage> allowedMessages)
+        //{
+        //    allowedMessages.Insert(new AllowedMessage()
+        //    {
+        //        UserId = 2,
+        //        MessageId = 1
+        //    });
+        //}
 
     }
 }

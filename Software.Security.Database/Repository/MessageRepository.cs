@@ -9,10 +9,10 @@ namespace Software.Security.Database.Repository
 {
     public class MessageRepository : IMessageRepository
     {
-        private readonly ISoftwareSecurityDatabase _database;
+        private readonly SoftwareSecurityDatabase _database;
 
         private readonly int _messageLimit = 10;
-        public MessageRepository(ISoftwareSecurityDatabase database)
+        public MessageRepository(SoftwareSecurityDatabase database)
         {
             _database = database;
         }
@@ -29,10 +29,11 @@ namespace Software.Security.Database.Repository
             var message = new Message()
             {
                 Text = text,
-                UserId = userId,
+                Owner = this._database.Users.Where(i=> i.UserId.Equals(userId)).FirstOrDefault (),
                 Modified = DateTime.Now
             };
-            this._database.Messages.Insert(message);
+            this._database.Messages.Add(message);
+            this._database.SaveChanges();
             return message;
         }
         public bool RemoveMessage(int id)
@@ -40,7 +41,8 @@ namespace Software.Security.Database.Repository
             var message = this._database.Messages.Where(i => i.MessageId.Equals(id)).FirstOrDefault();
             if(message != null)
             {
-                this._database.Messages.Delete(message);
+                this._database.Messages.Remove(message);
+                this._database.SaveChanges();
                 return true;
             }
             return false;
@@ -52,7 +54,7 @@ namespace Software.Security.Database.Repository
             {
                 message.Text = text;
                 message.Modified = DateTime.Now;
-                this._database.Messages.Update(message);
+                this._database.SaveChanges();
                 return message;
             }
             return null;

@@ -7,9 +7,9 @@ namespace Software.Security.Database.Repository
 {
     public class AuthorizationRepository : IAuthorizationRepository
     {
-        private readonly ISoftwareSecurityDatabase _database; 
+        private readonly SoftwareSecurityDatabase _database; 
 
-        public AuthorizationRepository(ISoftwareSecurityDatabase database)
+        public AuthorizationRepository(SoftwareSecurityDatabase database)
         {
             _database = database;
         }
@@ -22,25 +22,27 @@ namespace Software.Security.Database.Repository
         public bool IsUserOwnerMessage(int userId, int messageId)
         {
             var message = this._database.Messages.Where(i => i.MessageId.Equals(messageId)).FirstOrDefault();
-            return message != null ? message.UserId.Equals(userId): false;
+            return message != null ? message.Owner.UserId.Equals(userId): false;
         }
 
         public bool IsUserAllowedToEdit(int userId, int messageId)
         {
-            return this._database.AllowedMessages.Where(i => i.MessageId.Equals(messageId) && i.UserId.Equals(userId)).Any();
+
+            return this._database.Messages.Where(i => i.MessageId.Equals(messageId) && i.Allowed.Where(j=> j.UserId.Equals(userId)).Any()).Any();
         }
 
         public bool Register(string login, string passwordHash)
         {
             if(this._database.Users.Any(i=> i.Name.Equals(login)))
             {
-                throw new ArgumentException();
+                return false;
             }
-            this._database.Users.Insert(new User()
+            this._database.Users.Add(new User()
             {
                 Name = login,
                 PasswordHash = passwordHash,
             });
+            this._database.SaveChanges();
             return true;
         }
 
@@ -48,22 +50,29 @@ namespace Software.Security.Database.Repository
         {
             return this._database.Users.Where(i => i.Name.Equals(login)).FirstOrDefault();
         }
+        public User GetUser(int userId)
+        {
+            return this._database.Users.Where(i => i.UserId.Equals(userId)).FirstOrDefault();
 
+        }
+        
         public void AddUserToAllowedMessage(int userId, int messageId)
         {
-            this._database.AllowedMessages.Insert(new AllowedMessage()
+            var message = this._database.Messages.Where(i => i.MessageId.Equals(messageId)).FirstOrDefault();
+            if (message != null)
             {
-                MessageId = messageId,
-                UserId = userId
-            });
+                message.Allowed.Add(this.GetUser(userId));
+                this._database.SaveChanges();
+            }
         }
 
         public bool RemoveUserFromAllowedMessage(int userId, int messageId)
         {
-            var message = this._database.AllowedMessages.Where(i => i.MessageId.Equals(messageId) && i.UserId.Equals(userId)).FirstOrDefault();
-            if(message != null)
+            var message = this._database.Messages.Where(i => i.MessageId.Equals(messageId)).FirstOrDefault();
+            if (message != null)
             {
-                this._database.AllowedMessages.Delete(message);
+                message.Allowed.Remove(this.GetUser(userId));
+                this._database.SaveChanges();
                 return true;
             }
             return false;
@@ -71,10 +80,11 @@ namespace Software.Security.Database.Repository
 
         public IEnumerable<User> GetUsersFromAllowedMessage(int messageId)
         {
-            var message = this._database.AllowedMessages.Where(i => i.MessageId.Equals(messageId)).ToList();
-            if(message != null)
+            var message = this._database.Messages.Where(i => i.MessageId.Equals(messageId)).FirstOrDefault();
+
+            if (message != null)
             {
-                foreach (var item in message)
+                foreach (var item in message.Allowed)
                 {
                     yield return this._database.Users.Where(i => i.UserId.Equals(item.UserId)).FirstOrDefault();
                 }

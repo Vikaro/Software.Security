@@ -82,7 +82,7 @@ namespace Software.Security.Controllers
             {
                 var model = this._messageRepository.EditMessage(messageId, text);
                 //return Json(model, JsonRequestBehavior.AllowGet);
-                return RedirectToAction("Index","Home");
+                return RedirectToAction("Index", "Home");
             }
             return RedirectToAction("Unauthorized", "Error");
         }
