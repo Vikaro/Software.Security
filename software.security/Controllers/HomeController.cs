@@ -43,24 +43,5 @@ namespace Software.Security.Controllers
             return View();
         }
 
-        public ActionResult Login()
-        {
-            return View();
-        }
-
-        public ActionResult UserLogin(string login, string password)
-        {
-            if (this._authorizationRepository.IsUserExist(login, password))
-            {
-                var user = this._authorizationRepository.GetUser(login);
-                var model = this._mapper.Map<UserViewModel>(user);
-                Session.Add("CurrentUser", model);
-
-                this.ViewBag.Message = "Login succeed";
-                return RedirectToAction("Index");
-            }
-            this.ViewBag.Message = "Login failed";
-            return RedirectToAction("Login");
-        }
     }
 }

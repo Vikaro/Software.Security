@@ -1,0 +1,46 @@
+﻿@model NetCoreWebsite.Models.MessageViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h2>Edit</h2>
+
+<h4>Message</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditPOST" method="get">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Message.MessageId" />
+            <div class="form-group">
+                <label asp-for="Message.Text" class="control-label"></label>
+                <input asp-for="Message.Text" class="form-control" />
+                <span asp-validation-for="Message.Text" class="text-danger"></span>
+            </div>
+            <select asp-for="SelectedUsers" asp-items="Model.UserList" class="form-control"></select>
+
+            @*<div class="form-group">
+            <label asp-for="" class="control-label"></label>
+            <input asp-for="Text" class="form-control" />
+            <span asp-validation-for="Text" class="text-danger"></span>
+        </div>*@
+            @*<div class="form-group">
+            <label asp-for="Modified" class="control-label"></label>
+            <input asp-for="Modified" class="form-control" />
+            <span asp-validation-for="Modified" class="text-danger"></span>
+        </div>*@
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

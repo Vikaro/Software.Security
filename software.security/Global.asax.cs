@@ -1,4 +1,5 @@
-﻿using SimpleInjector;
+﻿using Microsoft.ApplicationInsights.Extensibility;
+using SimpleInjector;
 using SimpleInjector.Integration.Web;
 using SimpleInjector.Integration.Web.Mvc;
 using Software.Security.App_Start;
@@ -6,6 +7,7 @@ using Software.Security.Database;
 using Software.Security.Database.Repository;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Web;
@@ -26,6 +28,8 @@ namespace Software.Security
         }
         protected void Application_Start()
         {
+            DisableApplicationInsightsOnDebug();
+
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
@@ -56,6 +60,17 @@ namespace Software.Security
         {
             var mp = container.GetInstance<AutoMapperConfig>();
             return mp.GetMapper();
+        }
+
+       
+
+        /// <summary>
+        /// Disables the application insights locally.
+        /// </summary>
+        [Conditional("DEBUG")]
+        private static void DisableApplicationInsightsOnDebug()
+        {
+            TelemetryConfiguration.Active.DisableTelemetry = true;
         }
     }
   

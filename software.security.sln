@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Software.Security", "softwa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Software.Security.Database", "Software.Security.Database\Software.Security.Database.csproj", "{8A033B51-DA68-470F-B505-73952073F33B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreWebsite", "NetCoreWebsite\NetCoreWebsite.csproj", "{27F4ED5B-74E7-44F5-BDEF-01A7706691BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8A033B51-DA68-470F-B505-73952073F33B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A033B51-DA68-470F-B505-73952073F33B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A033B51-DA68-470F-B505-73952073F33B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27F4ED5B-74E7-44F5-BDEF-01A7706691BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27F4ED5B-74E7-44F5-BDEF-01A7706691BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27F4ED5B-74E7-44F5-BDEF-01A7706691BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27F4ED5B-74E7-44F5-BDEF-01A7706691BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
