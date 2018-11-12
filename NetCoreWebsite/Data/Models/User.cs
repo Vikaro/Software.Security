@@ -9,26 +9,31 @@ using System.Threading.Tasks;
 
 namespace NetCoreWebsite.Data.Models
 {
-    public class User : IdentityUser<int>
+    public class User
     {
         public User()
         {
             this.AllowedMessages = new HashSet<UserMessage>();
-            this.LoginLogs = new HashSet<LoginLogs>();
+            this.LoginLogs = new HashSet<UserLogs>();
         }
-
+        [Key]
+        public int Id { get; set; }
+        public string UserName { get; set; }
+        [Display(Name = "Password")]
+        public string PasswordHash { get; set; }
+        public string Salt { get; set; }
         public int MaxFailedCount { get; set; }
         public virtual ICollection<UserMessage> AllowedMessages { get; set; }
         [InverseProperty("Owner")]
         public virtual ICollection<Message> OwnedMessages { get; set; }
 
-        public virtual ICollection<LoginLogs> LoginLogs { get; set; }
+        public virtual ICollection<UserLogs> LoginLogs { get; set; }
     }
-    public class LoginLogs
+    public class UserLogs
     {
         [Key]
         public int Id { get; set; }
-        public User User { get; set; }
+        public virtual User User { get; set; }
         public DateTime Date { get; set; }
         public bool Successfull { get; set; }
     }

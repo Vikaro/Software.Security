@@ -13,6 +13,8 @@ using NetCoreWebsite.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NetCoreWebsite.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using NetCoreWebsite.Manager;
 
 namespace NetCoreWebsite
 {
@@ -53,8 +55,19 @@ namespace NetCoreWebsite
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<Data.Models.User>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                        .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                        {
+                            options.LoginPath = "/User/Login";
+                            options.LogoutPath = "/User/Logout";
+                        });
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            });
+            //services.AddDefaultIdentity<Data.Models.User>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -118,6 +131,7 @@ namespace NetCoreWebsite
         {
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<IAuthorizationRepository, AuthorizationRepository>();
+            services.AddTransient<IUserManager, Manager.UserManager>();
         }
     }
 }

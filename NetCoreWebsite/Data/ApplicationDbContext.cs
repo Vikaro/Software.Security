@@ -9,7 +9,7 @@ using NetCoreWebsite.Data.Models;
 
 namespace NetCoreWebsite.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User,IdentityRole<int>, int>
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -18,6 +18,8 @@ namespace NetCoreWebsite.Data
         }
         public DbSet<Message> Messages { get; set; }
         public DbSet<UserMessage> UserMessages { get; set; }
+        public DbSet<User> Users{ get; set; }
+        public DbSet<UserLogs> UserLogs { get; set; }
 
         //public DbSet<User> Users { get; set; }
 

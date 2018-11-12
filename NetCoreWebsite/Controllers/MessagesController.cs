@@ -107,7 +107,7 @@ namespace NetCoreWebsite.Controllers
             {
                 return NotFound();
             }
-            if (!this.UserAllowedToEdit((int)id)) return this.Unauthorized();
+            if (!this.IsUserOwner(model.Message.MessageId)) return this.Unauthorized();
 
             if (ModelState.IsValid)
             {
@@ -124,6 +124,7 @@ namespace NetCoreWebsite.Controllers
 
                     _context.AddRange(allowedUsers);
                     dbMessage.Modified = DateTime.Now;
+                    dbMessage.Text = model.Message.Text;
                     _context.Update(dbMessage);
                     await _context.SaveChangesAsync();
                 }
@@ -142,7 +143,56 @@ namespace NetCoreWebsite.Controllers
             }
             return View(model);
         }
+        public async Task<IActionResult> EditMessage(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
+            if (!this.UserAllowedToEdit((int)id)) return this.Unauthorized();
+
+            var message = await _context.Messages.Where(i => i.MessageId == id).FirstOrDefaultAsync();
+            if (message == null)
+            {
+                return NotFound();
+            }
+            return View(message);
+        }
+        public async Task<IActionResult> EditMessagePOST(int id, Message model)
+        {
+            if (model?.MessageId == default(int))
+            {
+                return NotFound();
+            }
+            if (!this.UserAllowedToEdit(model.MessageId)) return this.Unauthorized();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                   
+                    var dbMessage = _context.Messages.Where(i => i.MessageId.Equals(model.MessageId)).FirstOrDefault();
+                    dbMessage.Modified = DateTime.Now;
+                    dbMessage.Text = model.Text;
+                    _context.Update(dbMessage);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!MessageExists(model.MessageId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
+        }
         // GET: Messages/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -150,7 +200,7 @@ namespace NetCoreWebsite.Controllers
             {
                 return NotFound();
             }
-            if (!this.UserAllowedToDelete((int)id)) return this.Unauthorized();
+            if (!this.IsUserOwner((int)id)) return this.Unauthorized();
 
             var message = await _context.Messages
                 .FirstOrDefaultAsync(m => m.MessageId == id);
@@ -166,7 +216,7 @@ namespace NetCoreWebsite.Controllers
         [HttpGet, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!this.UserAllowedToDelete((int)id)) return this.Unauthorized();
+            if (!this.IsUserOwner((int)id)) return this.Unauthorized();
 
             var message = await _context.Messages.FindAsync(id);
             _context.Messages.Remove(message);
@@ -185,6 +235,6 @@ namespace NetCoreWebsite.Controllers
             return userId;
         }
         private bool UserAllowedToEdit(int messageId) => this._authorizationRepository.IsUserOwnerMessage(this.GetUserId(), messageId) || this._authorizationRepository.IsUserAllowedToEdit(this.GetUserId(), messageId);
-        private bool UserAllowedToDelete(int messageId) => this._authorizationRepository.IsUserOwnerMessage(this.GetUserId(), messageId);
+        private bool IsUserOwner(int messageId) => this._authorizationRepository.IsUserOwnerMessage(this.GetUserId(), messageId);
     }
 }

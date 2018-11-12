@@ -37,9 +37,16 @@
                 @Html.DisplayFor(modelItem => item.Owner.UserName)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.MessageId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MessageId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MessageId">Delete</a>
+                @if ( User?.Identity?.Name != null && User.Identity.Name.Equals(item.Owner.UserName))
+                {
+                    <a asp-action="Edit" asp-route-id="@item.MessageId">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.MessageId">Delete</a>
+                }
+                else
+                {
+                    <a asp-action="EditMessage" asp-route-id="@item.MessageId">Edit</a>
+                }
+                <a asp-action="Details" asp-route-id="@item.MessageId">Details</a>
             </td>
         </tr>
 }
