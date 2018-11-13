@@ -18,24 +18,51 @@
             @Html.DisplayFor(model => model.UserName)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.PasswordHash)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.PasswordHash)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Salt)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Salt)
-        </dd>
-        <dt>
             @Html.DisplayNameFor(model => model.MaxFailedCount)
         </dt>
         <dd>
             @Html.DisplayFor(model => model.MaxFailedCount)
         </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LastSuccesfullLogin)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.LastSuccesfullLogin)
+        </dd>
+        <dt>
+            Failed count
+        </dt>
+        <dd>
+            @Model.LoginLogs.Where(i => i.Successfull == false &&  i.Date > Model.LastSuccesfullLogin).Count()
+        </dd>
     </dl>
+</div>
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.LoginLogs.FirstOrDefault().Date)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.LoginLogs.FirstOrDefault().Successfull)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var log in Model.LoginLogs)
+            {
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => log.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => log.Successfull)
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |

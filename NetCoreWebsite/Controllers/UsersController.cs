@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using NetCoreWebsite.Manager;
 
 namespace NetCoreWebsite.Controllers
 {
+    [Authorize]
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -35,7 +37,7 @@ namespace NetCoreWebsite.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users
+            var user = await _context.Users.Include(i=> i.LoginLogs)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -44,7 +46,7 @@ namespace NetCoreWebsite.Controllers
 
             return View(user);
         }
-
+        [AllowAnonymous]
         // GET: Users/Create
         public IActionResult Create()
         {
@@ -86,9 +88,7 @@ namespace NetCoreWebsite.Controllers
         // POST: Users/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UserName,PasswordHash,MaxFailedCount")] User user)
+        public async Task<IActionResult> EditPOST(int id, [Bind("Id,UserName,PasswordHash,MaxFailedCount, Locked")] User user)
         {
             if (id != user.Id)
             {
@@ -146,21 +146,31 @@ namespace NetCoreWebsite.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
+        [AllowAnonymous]
         public async Task<IActionResult> LoginPOST(User user)
         {
             if (await _userManager.SignIn(this.HttpContext, user))
             {
                 return RedirectToAction("Index", "Messages");
+            }else
+            {
+          
+                if(user.Locked) ModelState.AddModelError("Error", " Account is locked");
+                else if (user.LockedUntil > DateTime.MinValue) ModelState.AddModelError("Error", $" Account is locked until {user.LockedUntil.ToString()}");
+                else ModelState.AddModelError("Error", " Wrong login or password");
             }
-            ModelState.AddModelError("Login", "Login failed");
+            return View("Login");
+        }
+        public IActionResult LogoutPOST()
+        {
+             _userManager.SignOut(this.HttpContext);
             return RedirectToAction("Login");
         }
-
         private bool UserExists(int id)
         {
             return _context.Users.Any(e => e.Id == id);

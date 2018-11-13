@@ -83,7 +83,7 @@ namespace NetCoreWebsite.Controllers
                 return NotFound();
             }
 
-            if (!this.UserAllowedToEdit((int)id)) return this.Unauthorized();
+            if (!this.IsUserOwner((int)id)) return this.Unauthorized();
 
             var message = await _context.Messages.Include(i => i.Allowed).Include(i => i.Owner).Where(i => i.MessageId == id).FirstOrDefaultAsync();
             if (message == null)
@@ -113,7 +113,7 @@ namespace NetCoreWebsite.Controllers
             {
                 try
                 {
-                    var allowedUsers = model.SelectedUsers.Select(i => new UserMessage
+                    var allowedUsers = model.SelectedUsers?.Select(i => new UserMessage
                     {
                         UserId = int.Parse(i),
                         MessageId = model.Message.MessageId
@@ -122,7 +122,7 @@ namespace NetCoreWebsite.Controllers
                     _context.RemoveRange(dbMessage.Allowed);
                     await _context.SaveChangesAsync();
 
-                    _context.AddRange(allowedUsers);
+                    if(allowedUsers != null) _context.AddRange(allowedUsers);
                     dbMessage.Modified = DateTime.Now;
                     dbMessage.Text = model.Message.Text;
                     _context.Update(dbMessage);

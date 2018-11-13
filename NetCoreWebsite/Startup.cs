@@ -59,8 +59,8 @@ namespace NetCoreWebsite
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                         .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                         {
-                            options.LoginPath = "/User/Login";
-                            options.LogoutPath = "/User/Logout";
+                            options.LoginPath = "/Users/Login";
+                            options.LogoutPath = "/Users/Logout";
                         });
             services.AddAuthentication(options =>
             {

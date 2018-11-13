@@ -20,7 +20,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="PasswordHash" class="control-label"></label>
-                <input asp-for="PasswordHash" class="form-control" />
+                <input type="password" asp-for="PasswordHash" class="form-control" />
                 <span asp-validation-for="PasswordHash" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -29,7 +29,12 @@
         </form>
     </div>
 </div>
-
+@if (!ViewData.ModelState.IsValid && ViewData.ModelState["Error"].Errors.Count > 0)
+{
+    <div class="alert alert-danger">
+       <strong>Error! </strong>@ViewData.ModelState["Error"].Errors.First().ErrorMessage
+    </div>
+}
 <div>
     <a asp-action="Index">Back to List</a>
 </div>

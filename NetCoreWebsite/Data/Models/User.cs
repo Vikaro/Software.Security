@@ -23,6 +23,9 @@ namespace NetCoreWebsite.Data.Models
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public int MaxFailedCount { get; set; }
+        public DateTime LockedUntil { get; set; }
+        public bool Locked { get; set; }
+        public DateTime LastSuccesfullLogin { get; set; }
         public virtual ICollection<UserMessage> AllowedMessages { get; set; }
         [InverseProperty("Owner")]
         public virtual ICollection<Message> OwnedMessages { get; set; }
