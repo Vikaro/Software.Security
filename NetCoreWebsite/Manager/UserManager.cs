@@ -25,7 +25,7 @@ namespace NetCoreWebsite.Manager
         {
             bool result = false;
 
-            var user = this._context.Users.Where(i => i.UserName.Equals(inputUser.UserName) && i.PasswordHash.Equals(inputUser.PasswordHash)).FirstOrDefault();
+            var user = this._context.Users.Include(i=> i.LoginLogs) .Where(i => i.UserName.Equals(inputUser.UserName) && i.PasswordHash.Equals(inputUser.PasswordHash)).FirstOrDefault();
             if (user != null)
             {
                 result = true;
@@ -38,8 +38,8 @@ namespace NetCoreWebsite.Manager
 
                 ClaimsIdentity identity = new ClaimsIdentity(this.GetUserClaims(user), CookieAuthenticationDefaults.AuthenticationScheme);
                 ClaimsPrincipal principal = new ClaimsPrincipal(identity);
-
-                user.LastSuccesfullLogin = DateTime.Now;
+                var lastSuccesfull = user.LoginLogs.Where(i => i.Successfull == true).LastOrDefault();
+                user.LastSuccesfullLogin = lastSuccesfull?.Date ?? DateTime.Now;
                 this._context.Update(user);
                 await this._context.UserLogs.AddAsync(new UserLogs
                 {
@@ -61,15 +61,15 @@ namespace NetCoreWebsite.Manager
                 });
                 if (user != null)
                 {
-                    var failedCount = user.LoginLogs.Where(i => i.Successfull == false && i.Date > user.LastSuccesfullLogin).Count();
-                    if (user.MaxFailedCount > 0 && failedCount >= user.MaxFailedCount)
-                    {
-                        user.Locked = true;
-                    }
-                    else if(user.MaxFailedCount > 0)
-                    {
-                        user.LockedUntil = DateTime.Now.AddSeconds(failedCount * 10);
-                    }
+                    //var failedCount = user.LoginLogs.Where(i => i.Successfull == false && i.Date > user.LastSuccesfullLogin).Count();
+                    //if (user.MaxFailedCount > 0 && failedCount >= user.MaxFailedCount)
+                    //{
+                    //    user.Locked = true;
+                    //}
+                    //else if(user.MaxFailedCount > 0)
+                    //{
+                    //    user.LockedUntil = DateTime.Now.AddSeconds(failedCount * 10);
+                    //}
                 }
             }
             await this._context.SaveChangesAsync();

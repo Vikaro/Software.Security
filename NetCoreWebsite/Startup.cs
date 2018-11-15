@@ -41,7 +41,14 @@ namespace NetCoreWebsite
                 options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+            services.AddDistributedMemoryCache();
 
+            services.AddSession(options =>
+            {
+                // Set a short timeout for easy testing.
+                options.IdleTimeout = TimeSpan.FromSeconds(60);
+                options.Cookie.HttpOnly = true;
+            });
             services.Configure<PasswordOptions>(options =>
             {
                 options.RequireDigit = false;
@@ -91,6 +98,8 @@ namespace NetCoreWebsite
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseSession();
+            //app.UseHttpContextItemsMiddleware();
 
             app.UseAuthentication();
             app.UseStatusCodePages(async context =>
@@ -102,6 +111,7 @@ namespace NetCoreWebsite
                     "Status code page, status code: " +
                     context.HttpContext.Response.StatusCode);
             });
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,7 @@ namespace NetCoreWebsite.Controllers
                 return NotFound();
             }
 
-            var user = await _context.Users.Include(i=> i.LoginLogs)
+            var user = await _context.Users.Include(i => i.LoginLogs)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
@@ -154,21 +155,34 @@ namespace NetCoreWebsite.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoginPOST(User user)
         {
-            if (await _userManager.SignIn(this.HttpContext, user))
+            var failedCount = this.HttpContext.Session.GetInt32("FailedCount") ?? 0;
+            var delay = this.HttpContext.Session.GetString("Delay");
+            DateTime.TryParse(delay, out var delayDateTime);
+            if (await _userManager.SignIn(this.HttpContext, user) && delayDateTime < DateTime.Now)
             {
                 return RedirectToAction("Index", "Messages");
-            }else
+            }
+            else
             {
-          
-                if(user.Locked) ModelState.AddModelError("Error", " Account is locked");
-                else if (user.LockedUntil > DateTime.MinValue) ModelState.AddModelError("Error", $" Account is locked until {user.LockedUntil.ToString()}");
-                else ModelState.AddModelError("Error", " Wrong login or password");
+                if (delayDateTime > DateTime.Now)
+                {
+                    ModelState.AddModelError("Error", $" You are locked until {delay}");
+                }
+                else if (user.Locked) ModelState.AddModelError("Error", " Account is locked");
+                //else if (user.LockedUntil > DateTime.MinValue) ModelState.AddModelError("Error", $" Account is locked until {user.LockedUntil.ToString()}");
+                else
+                {
+                    ModelState.AddModelError("Error", " Wrong login or password");
+                    HttpContext.Session.SetInt32("FailedCount", ++failedCount);
+                    HttpContext.Session.SetString("Delay", DateTime.Now.AddSeconds(15 * failedCount).ToString());
+                }
+
             }
             return View("Login");
         }
         public IActionResult LogoutPOST()
         {
-             _userManager.SignOut(this.HttpContext);
+            _userManager.SignOut(this.HttpContext);
             return RedirectToAction("Login");
         }
         private bool UserExists(int id)
