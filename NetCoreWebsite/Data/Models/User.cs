@@ -23,9 +23,10 @@ namespace NetCoreWebsite.Data.Models
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public int MaxFailedCount { get; set; }
-        public DateTime LockedUntil { get; set; }
         public bool Locked { get; set; }
         public DateTime LastSuccesfullLogin { get; set; }
+        public string PasswordMask { get; set; }
+        public string SecondPassword { get; set; }
         public virtual ICollection<UserMessage> AllowedMessages { get; set; }
         [InverseProperty("Owner")]
         public virtual ICollection<Message> OwnedMessages { get; set; }
@@ -39,5 +40,12 @@ namespace NetCoreWebsite.Data.Models
         public virtual User User { get; set; }
         public DateTime Date { get; set; }
         public bool Successfull { get; set; }
+
+    }
+    public struct UserLogPlace
+    {
+        public const string FirstLogin = "First login";
+        public const string SecondLogin = "Second login";
+        public const string PasswordChange = "Password change";
     }
 }
