@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using NetCoreWebsite.Manager;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,31 +18,46 @@ namespace NetCoreWebsite.Data.Models
             this.LoginLogs = new HashSet<UserLogs>();
         }
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        [Required]
         public string UserName { get; set; }
         [Display(Name = "Password")]
+        [Required]
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public int MaxFailedCount { get; set; }
         public bool Locked { get; set; }
         public DateTime LastSuccesfullLogin { get; set; }
-        public string PasswordMask { get; set; }
-        public string SecondPassword { get; set; }
+        //public string PasswordMask { get; set; }
+        public int SecondPasswordId { get; set; }
+        public ICollection<UserSecondPassword> SecondPassword { get; set; }
         public virtual ICollection<UserMessage> AllowedMessages { get; set; }
         [InverseProperty("Owner")]
         public virtual ICollection<Message> OwnedMessages { get; set; }
-
         public virtual ICollection<UserLogs> LoginLogs { get; set; }
+
+        public string PasswordMask()
+        {
+            return this.SecondPassword.FirstOrDefault(i => i.Id == this.SecondPasswordId && i.Removed == false)?.Mask;
+        }
+        public string SecondPasswordHash()
+        {
+            return this.SecondPassword.FirstOrDefault(i => i.Id == this.SecondPasswordId && i.Removed == false)?.Hash;
+        }
     }
+
     public class UserLogs
     {
         [Key]
         public int Id { get; set; }
+        public string UserName { get; set; }
         public virtual User User { get; set; }
         public DateTime Date { get; set; }
         public bool Successfull { get; set; }
-
+        public SignInStep Step { get; set; }
     }
+
     public struct UserLogPlace
     {
         public const string FirstLogin = "First login";

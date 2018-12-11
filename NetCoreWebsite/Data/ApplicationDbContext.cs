@@ -20,6 +20,8 @@ namespace NetCoreWebsite.Data
         public DbSet<UserMessage> UserMessages { get; set; }
         public DbSet<User> Users{ get; set; }
         public DbSet<UserLogs> UserLogs { get; set; }
+        public DbSet<UserSecondPassword> UserSecondPasswords { get; set; }
+        public DbSet<NotFoundUser> NotFoundUsers { get; set; }
 
         //public DbSet<User> Users { get; set; }
 
@@ -39,6 +41,10 @@ namespace NetCoreWebsite.Data
                  .HasOne(m => m.User)
                 .WithMany(a => a.AllowedMessages)
                 .HasForeignKey(m => m.UserId);
+            modelBuilder.Entity<User>()
+                .HasMany(i => i.SecondPassword)
+                .WithOne(i => i.User);
+
             base.OnModelCreating(modelBuilder);
         }
     }

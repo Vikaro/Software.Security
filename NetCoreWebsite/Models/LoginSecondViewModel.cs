@@ -7,7 +7,7 @@ namespace NetCoreWebsite.Models
     {
         public int UserId { get; set; }
 
-        public IDictionary<int, MaskViewModel> PasswordMask { get; set; };
+        public IDictionary<int, MaskViewModel> PasswordMask { get; set; }
         public class MaskViewModel
         {
             [Display(Name = "Character", AutoGenerateField = true)]

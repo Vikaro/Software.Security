@@ -29,16 +29,32 @@
         </form>
     </div>
 </div>
-@if (!ViewData.ModelState.IsValid && ViewData.ModelState["Error"].Errors.Count > 0)
+@if (ViewData?.ModelState?.IsValid != null && !ViewData.ModelState.IsValid && ViewData.ModelState["Error"]?.Errors?.Count > 0)
 {
     <div class="alert alert-danger">
-       <strong>Error! </strong>@ViewData.ModelState["Error"].Errors.First().ErrorMessage
+        @foreach (var error in ViewData.ModelState["Error"].Errors)
+        {
+            <strong>Error! </strong>@error.ErrorMessage
+        }
+
     </div>
 }
+<div>
+    <span id="time"></span>
+</div>
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+  
 }
+<script>
+      window.onload = function(){
+          //document.getElementById("time").innerHTML = new Date().toLocaleString();
+          this.setInterval(function () {
+              document.getElementById("time").innerHTML = new Date().toLocaleString();
+          }, 1000);
+    };
+</script>

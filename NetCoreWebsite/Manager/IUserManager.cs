@@ -1,14 +1,19 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using NetCoreWebsite.Data.Models;
+using static NetCoreWebsite.Models.LoginSecondViewModel;
 
 namespace NetCoreWebsite.Manager
 {
     public interface IUserManager
     {
         Task<bool> SignIn(HttpContext httpContext, User user, bool isPersistent = false);
+        Task SignInUserAsync(HttpContext httpContext, int userId);
+
         void SignOut(HttpContext httpContext);
-        Task<bool> FirstStepSignIn(User user);
-        Task<bool> SecondStepSignIn(HttpContext httpContext, string userName, string password);
+        Task<SingInModel> FirstStepSignIn(User user);
+        Task<SingInModel> SecondStepSignIn(int userId, IDictionary<int, MaskViewModel> password);
+        Task<int> GenerateSecondPasswordsAsync(int userId, string password);
     }
 }

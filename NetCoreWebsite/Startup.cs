@@ -46,7 +46,7 @@ namespace NetCoreWebsite
             services.AddSession(options =>
             {
                 // Set a short timeout for easy testing.
-                options.IdleTimeout = TimeSpan.FromSeconds(60);
+                options.IdleTimeout = TimeSpan.FromSeconds(600);
                 options.Cookie.HttpOnly = true;
             });
             services.Configure<PasswordOptions>(options =>
@@ -142,6 +142,7 @@ namespace NetCoreWebsite
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<IAuthorizationRepository, AuthorizationRepository>();
             services.AddTransient<IUserManager, Manager.UserManager>();
+            services.AddTransient<IPasswordHasher<Data.Models.User>, PasswordHasher<Data.Models.User>>();
         }
     }
 }

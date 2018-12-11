@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetCoreWebsite.Data;
 
 namespace NetCoreWebsite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181127084805_users-14")]
+    partial class users14
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,23 +40,6 @@ namespace NetCoreWebsite.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("NetCoreWebsite.Data.Models.NotFoundUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Mask");
-
-                    b.Property<int>("MaxFailedCount");
-
-                    b.Property<string>("Username");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("NotFoundUsers");
-                });
-
             modelBuilder.Entity("NetCoreWebsite.Data.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -67,15 +52,13 @@ namespace NetCoreWebsite.Migrations
 
                     b.Property<int>("MaxFailedCount");
 
-                    b.Property<string>("PasswordHash")
-                        .IsRequired();
+                    b.Property<string>("PasswordHash");
 
                     b.Property<string>("Salt");
 
                     b.Property<int>("SecondPasswordId");
 
-                    b.Property<string>("UserName")
-                        .IsRequired();
+                    b.Property<string>("UserName");
 
                     b.HasKey("Id");
 
@@ -90,13 +73,9 @@ namespace NetCoreWebsite.Migrations
 
                     b.Property<DateTime>("Date");
 
-                    b.Property<int>("Step");
-
                     b.Property<bool>("Successfull");
 
                     b.Property<int?>("UserId");
-
-                    b.Property<string>("UserName");
 
                     b.HasKey("Id");
 

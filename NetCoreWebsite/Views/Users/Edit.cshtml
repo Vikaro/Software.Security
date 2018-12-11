@@ -30,10 +30,10 @@
                 <span asp-validation-for="Locked" class="text-danger"></span>
             </div>
             @*<div class="form-group">
-            <label asp-for="Salt" class="control-label"></label>
-            <input asp-for="Salt" class="form-control" />
-            <span asp-validation-for="Salt" class="text-danger"></span>
-        </div>*@
+                    <label asp-for="Salt" class="control-label"></label>
+                    <input asp-for="Salt" class="form-control" />
+                    <span asp-validation-for="Salt" class="text-danger"></span>
+                </div>*@
             <div class="form-group">
                 <label asp-for="MaxFailedCount" class="control-label"></label>
                 <input asp-for="MaxFailedCount" class="form-control" />
@@ -50,6 +50,12 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+<div>
+    <a asp-action="SecondPasswordChange">Second Password Change</a>
+</div>
+<div>
+    <a asp-action="SecondPasswordGeneratePOST" asp-route-userId=@Model.Id>Second Password Generate</a>
+</div>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
