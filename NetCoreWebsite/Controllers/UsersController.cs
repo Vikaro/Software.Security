@@ -159,24 +159,26 @@ namespace NetCoreWebsite.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoginPOST(User user)
         {
-            if (!ModelState.IsValid || string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(user.PasswordHash)) return View("Login");
-            var signInModel = (await _userManager.FirstStepSignIn(user));
-            switch (signInModel.Status)
-            {
-                case SignInStatus.Success:
-                    this.HttpContext.Session.SetString(this._SessionUserId, user.Id.ToString());
-                    return RedirectToAction("LoginSecond", new { userId = user.Id });
-                case SignInStatus.Delayed:
-                    ModelState.AddModelError("Error", $" Your account is locked. Try again in {signInModel.Delayed}"); break;
-                case SignInStatus.Failed:
-                    ModelState.AddModelError("Error", $" Wrong login or password. You will be locked until {signInModel.Delayed}.");
-                    //ModelState.AddModelError("Error", $" Your account is locked. Try again in {signInModel.Delayed}"); break;
-                    break;
-                case SignInStatus.Locked:
-                    ModelState.AddModelError("Error", " Account is locked. Please contact administrator."); break;
+            if (!ModelState.IsValid || string.IsNullOrEmpty(user.UserName)) return View("Login");
+            //var signInModel = (await _userManager.FirstStepSignIn(user));
+            //switch (signInModel.Status)
+            //{
+            //    case SignInStatus.Success:
+            //        this.HttpContext.Session.SetString(this._SessionUserId, user.Id.ToString());
+            //        return RedirectToAction("LoginSecond", new { userId = user.Id });
+            //    case SignInStatus.Delayed:
+            //        ModelState.AddModelError("Error", $" Your account is locked. Try again in {signInModel.Delayed}"); break;
+            //    case SignInStatus.Failed:
+            //        ModelState.AddModelError("Error", $" Wrong login or password. You will be locked until {signInModel.Delayed}.");
+            //        //ModelState.AddModelError("Error", $" Your account is locked. Try again in {signInModel.Delayed}"); break;
+            //        break;
+            //    case SignInStatus.Locked:
+            //        ModelState.AddModelError("Error", " Account is locked. Please contact administrator."); break;
 
-            }
-            return View("Login");
+            //}
+            return RedirectToAction("LoginSecond", new { username = user.UserName });
+
+            //return View("Login");
 
 
             //if ((await _userManager.FirstStepSignIn(user)).Status == SignInStatus.Success)
@@ -208,46 +210,50 @@ namespace NetCoreWebsite.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> LoginSecond(int userId)
+        public async Task<IActionResult> LoginSecond(string username)
         {
-            var sUserId = this.HttpContext.Session.GetString(this._SessionUserId);
-            if (!(int.TryParse(sUserId, out int sessionUserId) && sessionUserId.Equals(userId)))
-            {
-                ModelState.AddModelError("Error", " Session have expired");
-                return View("Login");
-            }
+            //var sUserId = this.HttpContext.Session.GetString(this._SessionUserId);
+            //if (!(int.TryParse(sUserId, out int sessionUserId) && sessionUserId.Equals(userId)))
+            //{
+            //    ModelState.AddModelError("Error", " Session have expired");
+            //    return View("Login");
+            //}
 
-
-            var user = await this._context.Users.Include(i => i.SecondPassword).FirstOrDefaultAsync(i => i.Id.Equals(userId));
+            var model = new LoginSecondViewModel();
+            var user = await this._context.Users.Include(i => i.SecondPassword).FirstOrDefaultAsync(i => i.UserName.Equals(username));
             if (user == null)
             {
-                ModelState.AddModelError("Error", " User not found");
-                return View("Login");
+                model.UserId = 0;
+                model.Username = username;
+                model.PasswordMask = this.GetMaskModel(username);
+                //ModelState.AddModelError("Error", " User not found");
+                //return View("Login");
+            }
+            else
+            {
+                //model.UserId = user.Id;
+                model.Username = username;
+                model.PasswordMask = this.GetMaskModel(user);
             }
 
-            var model = new LoginSecondViewModel()
-            {
-                UserId = userId,
-                PasswordMask = this.GetMaskModel(user)
-            };
             return View(model);
         }
         [AllowAnonymous]
         public async Task<IActionResult> LoginSecondPost(LoginSecondViewModel model)
         {
             if (!ModelState.IsValid) return View("Login");
-            var sUserId = this.HttpContext.Session.GetString(this._SessionUserId);
-            this.HttpContext.Session.Remove(this._SessionUserId);
-            if (!(int.TryParse(sUserId, out int sessionUserId) && sessionUserId.Equals(model.UserId)))
-            {
-                ModelState.AddModelError("Error", " Session have expired");
-                return View("Login");
-            }
-            var signInModel = await this._userManager.SecondStepSignIn(model.UserId, model.PasswordMask);
+            //var sUserId = this.HttpContext.Session.GetString(this._SessionUserId);
+            //this.HttpContext.Session.Remove(this._SessionUserId);
+            //if (!(int.TryParse(sUserId, out int sessionUserId) && sessionUserId.Equals(model.UserId)))
+            //{
+            //    ModelState.AddModelError("Error", " Session have expired");
+            //    return View("Login");
+            //}
+            var signInModel = await this._userManager.SecondStepSignIn(model.UserId, model.Username,  model.PasswordMask);
             switch (signInModel.Status)
             {
                 case SignInStatus.Success:
-                    await this._userManager.SignInUserAsync(this.HttpContext, model.UserId);
+                    await this._userManager.SignInUserAsync(this.HttpContext, signInModel.UserId);
                     return RedirectToAction("Index", "Messages");
                 case SignInStatus.Delayed:
                     ModelState.AddModelError("Error", $" Your account is locked. Try again in {signInModel.Delayed}"); break;
@@ -264,7 +270,51 @@ namespace NetCoreWebsite.Controllers
             return View("Login");
 
         }
+        private Dictionary<int, LoginSecondViewModel.MaskViewModel> GetMaskModel(string username)
+        {
+            var dict = new Dictionary<int, LoginSecondViewModel.MaskViewModel>();
 
+            var user = this._context.NotFoundUsers.FirstOrDefault(i => i.Username == username);
+            if (user != null)
+            {
+                var passwordMask = user;
+
+                for (int i = 0; i < passwordMask.Mask.Length; i++)
+                {
+                    var mask = new LoginSecondViewModel.MaskViewModel();
+                    if (passwordMask.Mask[i] == '1')
+                    {
+                        mask.Mask = true;
+                    }
+                    dict.Add(i, mask);
+                }
+                return dict;
+            }
+            else
+            {
+                var randomMask = _userManager.GenerateRandomMask();
+                var notFoundUser = new NotFoundUser()
+                {
+                    MaxFailedCount = _userManager.MaxLoginTries(),
+                    Username = username,
+                    Mask = _userManager.GenerateRandomMask()
+                };
+                this._context.NotFoundUsers.Add(notFoundUser);
+                this._context.SaveChanges();
+                var passwordMask = notFoundUser;
+
+                for (int i = 0; i < passwordMask.Mask.Length; i++)
+                {
+                    var mask = new LoginSecondViewModel.MaskViewModel();
+                    if (passwordMask.Mask[i] == '1')
+                    {
+                        mask.Mask = true;
+                    }
+                    dict.Add(i, mask);
+                }
+                return dict;
+            }
+        }
         private Dictionary<int, LoginSecondViewModel.MaskViewModel> GetMaskModel(User user)
         {
             var dict = new Dictionary<int, LoginSecondViewModel.MaskViewModel>();

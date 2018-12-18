@@ -6,7 +6,7 @@ namespace NetCoreWebsite.Models
     public class LoginSecondViewModel
     {
         public int UserId { get; set; }
-
+        public string Username { get; set; }
         public IDictionary<int, MaskViewModel> PasswordMask { get; set; }
         public class MaskViewModel
         {

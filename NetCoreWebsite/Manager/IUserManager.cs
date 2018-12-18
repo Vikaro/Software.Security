@@ -13,7 +13,9 @@ namespace NetCoreWebsite.Manager
 
         void SignOut(HttpContext httpContext);
         Task<SingInModel> FirstStepSignIn(User user);
-        Task<SingInModel> SecondStepSignIn(int userId, IDictionary<int, MaskViewModel> password);
+        Task<SingInModel> SecondStepSignIn(int userId, string username, IDictionary<int, MaskViewModel> password);
         Task<int> GenerateSecondPasswordsAsync(int userId, string password);
+        string GenerateRandomMask();
+        int MaxLoginTries();
     }
 }

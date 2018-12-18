@@ -19,6 +19,7 @@ namespace NetCoreWebsite.Manager
         public SignInStatus Status { get; set; }
         public DateTime Delayed { get; set; }
         public int FailedCount { get; set; }
+        public int UserId { get; set; }
     }
     public enum SignInStatus
     {
@@ -43,9 +44,9 @@ namespace NetCoreWebsite.Manager
         //private readonly int MaxLoginTries = 3;
         private readonly TimeSpan LoginDelay = new TimeSpan(0, 0, 5);
 
-        private int MaxLoginTries()
+        public int MaxLoginTries()
         {
-           return random.Next(0, 4);
+            return random.Next(0, 4);
         }
         private static Random Random = new Random();
         public UserManager(ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
@@ -66,21 +67,22 @@ namespace NetCoreWebsite.Manager
             var lastFailed = userLogs.Where(i => i.Successfull == false).LastOrDefault();
             return (lastFailed == null) ? DateTime.Now : lastFailed.Date.Add(LoginDelay.Multiply(count));
         }
+
         private SingInModel IsUserLocked(User userDb, int failedCount, string username)
         {
             var notFoundUser = this._context.NotFoundUsers.FirstOrDefault(i => i.Username == username);
-            if(userDb == null && notFoundUser == null)
+            if (userDb == null && notFoundUser == null)
             {
                 notFoundUser = new NotFoundUser()
                 {
                     MaxFailedCount = this.MaxLoginTries(),
                     Username = username,
-                    Mask = GeneratePasswordMask(random.Next(8,20))
+                    Mask = GeneratePasswordMask(random.Next(8, 20))
                 };
                 this._context.NotFoundUsers.Add(notFoundUser);
                 this._context.SaveChanges();
             }
-            if ((userDb != null && (userDb.MaxFailedCount < failedCount) && userDb.MaxFailedCount != 0) || (notFoundUser != null && ((notFoundUser.MaxFailedCount < failedCount) && notFoundUser.MaxFailedCount != 0)))
+            if ((userDb != null && (userDb.MaxFailedCount <= failedCount) && userDb.MaxFailedCount != 0) || (notFoundUser != null && ((notFoundUser.MaxFailedCount <= failedCount) && notFoundUser.MaxFailedCount != 0)))
             {
                 return new SingInModel
                 {
@@ -166,19 +168,18 @@ namespace NetCoreWebsite.Manager
             //}
         }
 
-        public async Task<SingInModel> SecondStepSignIn(int userId, IDictionary<int, MaskViewModel> password)
+        public async Task<SingInModel> SecondStepSignIn(int userId, string username, IDictionary<int, MaskViewModel> password)
         {
             var dbUser = await this._context.Users
                 .Include(i => i.LoginLogs)
                 .Include(i => i.SecondPassword)
-                .Where(i => i.Id.Equals(userId))
+                .Where(i => i.UserName.Equals(username))
                 .FirstOrDefaultAsync();
-            if (dbUser == null) return new SingInModel() { Status = SignInStatus.Failed };
 
-            var failedCount = this.GetFailedCount(dbUser.UserName);
-            var isLocked = this.IsUserLocked(dbUser, failedCount, dbUser.UserName);
+            var failedCount = this.GetFailedCount(username);
+            var isLocked = this.IsUserLocked(dbUser, failedCount, username);
             if (isLocked != null) return isLocked;
-            var enabledLoginTime = this.GetEnabledLoginTime(dbUser.UserName, failedCount);
+            var enabledLoginTime = this.GetEnabledLoginTime(username, failedCount);
             if (DateTime.Now < enabledLoginTime)
             {
                 return new SingInModel()
@@ -187,30 +188,62 @@ namespace NetCoreWebsite.Manager
                     Status = SignInStatus.Delayed
                 };
             }
+            var result = new SingInModel();
+            if (dbUser != null)
+            {
+                var isSuccessful = CheckMaskedPassword(dbUser, dbUser.PasswordMask(), password, dbUser.SecondPasswordHash());
 
-            var isSuccessful = CheckMaskedPassword(dbUser, dbUser.PasswordMask(), password, dbUser.SecondPasswordHash());
-
-            //dbUser.LastSuccesfullLogin = dbUser.LoginLogs.Last()?.Date ?? DateTime.Now;
-            dbUser.LastSuccesfullLogin = dbUser.LoginLogs.Last(i => i.Successfull == true && i.Step == SignInStep.SecondStep)?.Date ?? DateTime.Now;
-
-            var userLog = new UserLogs()
+                //dbUser.LastSuccesfullLogin = dbUser.LoginLogs.Last()?.Date ?? DateTime.Now;
+                dbUser.LastSuccesfullLogin = dbUser.LoginLogs.LastOrDefault(i => i.Successfull == true && i.Step == SignInStep.SecondStep)?.Date ?? DateTime.Now;
+                if (isSuccessful)
+                {
+                    result.Status = SignInStatus.Success;
+                    result.UserId = dbUser.Id;
+                }
+                else
+                {
+                    result.Status = SignInStatus.Failed;
+                    result.Delayed = DateTime.Now.Add(LoginDelay.Multiply(failedCount + 1));
+                    result.FailedCount = failedCount;
+                }
+            }
+            else
+            {
+                result.Status = SignInStatus.Failed;
+                result.Delayed = DateTime.Now.Add(LoginDelay.Multiply(failedCount + 1));
+                result.FailedCount = failedCount;
+            }
+            this._context.UserLogs.Add(new UserLogs()
             {
                 Date = DateTime.Now,
-                Successfull = isSuccessful,
+                Successfull = result.Status == SignInStatus.Success,
                 User = dbUser,
-                UserName = dbUser.UserName,
-                Step = SignInStep.SecondStep
-            };
+                UserName = username,
+                Step = SignInStep.FirstStep
+            });
 
-            this._context.Update(dbUser);
-            this._context.UserLogs.Add(userLog);
             await this._context.SaveChangesAsync();
+            return result;
 
-            return new SingInModel()
-            {
-                Status = isSuccessful ? SignInStatus.Success : SignInStatus.Failed,
-                Delayed = DateTime.Now.Add(LoginDelay.Multiply(failedCount + 1))
-            };
+
+            //var userLog = new UserLogs()
+            //{
+            //    Date = DateTime.Now,
+            //    Successfull = isSuccessful,
+            //    User = dbUser,
+            //    UserName = dbUser.UserName,
+            //    Step = SignInStep.SecondStep
+            //};
+
+            //this._context.Update(dbUser);
+            //this._context.UserLogs.Add(userLog);
+            //await this._context.SaveChangesAsync();
+
+            //return new SingInModel()
+            //{
+            //    Status = isSuccessful ? SignInStatus.Success : SignInStatus.Failed,
+            //    Delayed = DateTime.Now.Add(LoginDelay.Multiply(failedCount + 1))
+            //};
         }
 
         public async Task SignInUserAsync(HttpContext httpContext, int userId)
@@ -239,7 +272,7 @@ namespace NetCoreWebsite.Manager
                 {
                     if (passwordDict.TryGetValue(i, out var maskViewModel))
                     {
-                        if(maskViewModel.Char != null)
+                        if (maskViewModel.Char != null)
                         {
                             password += maskViewModel.Char.First();
                         }
@@ -330,6 +363,10 @@ namespace NetCoreWebsite.Manager
             return claims;
         }
 
+        public string GenerateRandomMask()
+        {
+            return this.GeneratePasswordMask(this.random.Next(8, 20));
+        }
         private string GeneratePasswordMask(int passwordLength)
         {
             int maskLength = (passwordLength > 10) ? passwordLength / 2 : this.MinimumMaskLength;

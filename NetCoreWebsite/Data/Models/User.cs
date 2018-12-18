@@ -23,7 +23,6 @@ namespace NetCoreWebsite.Data.Models
         [Required]
         public string UserName { get; set; }
         [Display(Name = "Password")]
-        [Required]
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public int MaxFailedCount { get; set; }
